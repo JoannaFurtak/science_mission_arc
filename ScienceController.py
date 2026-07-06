@@ -5,6 +5,7 @@ from can_msgs.msg import Frame
 from sensor_msgs.msg import JointState
 import States
 import curses
+import json
 #science_teleop
 #
 
@@ -77,13 +78,15 @@ class ScienceController:
     def run(self):
         pass
 
+
+    #CHAAAAAANGE  THAAAAT 
     def command_servos(self, msg_id):
         if msg_id == 0:
             cmd = 0x00d0
             if self.surface_container_pushed_in:
                 cmd = 0x01a0
 
-        elif msg_id == 2:
+        if msg_id == 2:
             cmd = 0x0200
             if self.deep_container_pushed_in:
                 cmd = 0x00d0
@@ -103,7 +106,7 @@ class ScienceController:
         self.can_publisher.publish(msg)
 
         
-
+    #funkcja na przesylanie wartosci do silnika
     def move_joint(self, joint, effort):
         msg = JointState()
         msg.header.stamp = rospy.Time.now()
@@ -112,11 +115,33 @@ class ScienceController:
         self.state_publisher.publish(msg)
 
 
-    #funkcja na odczyty z czujnikow
-    #zapisujaca odczyty do pliku json
-    #autonomy
+    #funkcja na odczyty z czujnikow i zapis
+    def sensors_data(self):
+        humidity = None
+        weight = None
+        pH =None
+
+        #define data
+        container = {'humidity': humidity,
+                'weight': weight,
+                'pH': pH}
+        
+        num = 0
+        if self.active_container == self.container1:
+            num = 1
+        else:
+            num = 2 
+
+        #write and save json file
+        with open(f'sensors_data_{num}.json', 'w', encoding='utf8') as outfile:
+            str_ = json.dump(container, outfile,
+                            indent=4, sort_keys=True,
+                            separators=(',', ': '), ensure_ascii=False)
 
     
+#autonomy
+
+
 
 
 
