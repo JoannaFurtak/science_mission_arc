@@ -1,23 +1,17 @@
 #! /usr/bin/python3
 from abc import ABC, abstractmethod
 
-"""
-self.num = public
-self._num = protected
-self.__num = private 
-"""
-
 class State(ABC):
 
     #getter
     @property
     def context(self):
-        return self._contexts 
+        return self.contexts 
 
     #setter
     @context.setter
     def context(self, context):
-        self._context = context
+        self.context = context
 
     @abstractmethod #kazdy stan ma metode step
     def step(self):
