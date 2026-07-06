@@ -86,7 +86,9 @@ class DeepDrillRetraction(State):
     def step(self):
         
         current_limit = -5
+        drill_limit = 10.000000 #sprawdz te limity!!!!!
         drill_limit = 10
+
         time = rospy.Time.now()
 
         if ((time - self.start_time).to_sec() > 2 and 
@@ -99,13 +101,104 @@ class DeepDrillRetraction(State):
 
     def __repr__(self):
         return "DeepDrillRetraction"
+    
 
-"""class LiftingModule(State):
+class LiftingModule(State):
+    def setup(self):
+        rospy.loginfo("lifting module")
+        self.start_time = rospy.Time.now()
+        self.context.move_joint("drill_lift", 0.0)
+
+    def step(self):
+        current_limit = 5 #CHECK LIMITS
+        module_limit = 0 #CHECK ALL OF THOSE LIMITSS
+
+        time = rospy.Time.now()
+
+        if ((time - self.start_time).to_sec() > 2 and 
+            (current_limit < self.context.module_current or 
+             module_limit < self.context.module_position)):
+            self.context.set_state(PushingContainer())
+            return
+
+        self.context.move_joint("module_lift", 0.4)
+
+    
+    def __repr__(self):
+        return "LiftingModule"
+
 
 class PushingContainer(State):
 
+    def setup(self):
+        rospy.loginfo("pushing container in")
+        self.start_time = rospy.Time.now()
+        self.context.move_joint("module_lift", 0.0) #zatrzymujemy go
+
+    def step(self):
+        time = rospy.Time.now()
+        if (time - self.start_time).to_sec() > 2:
+            self.context.set_state(EmptyingDrill())
+            return
+        self.context.deep_container_open = True 
+        self.context.deep_container_pushed_in = True 
+
+    def __repr__(self):
+        return "PushingContainer"
+
+
 class EmptyingDrill(State):
+    def setup(self):
+        rospy.loginfo("emptying drill")
+        self.start_time = rospy.Time.now()
 
-class ShakingContainer(State):
+    def step(self):
+        time = rospy.Time.now()
+        if (time - self.start_time).to_sec() > 4:
+            self.context.set_state(PushingContainerAway())
+            #self.context.set_state(ShakingContainer())
+            return
+        self.context.move_joint("drill_spin", -1.0)
 
-class PushingContainerAway(State):"""
+    def __repr__(self):
+        return "EmtyingDrill"
+
+
+class PushingContainerAway(State):
+
+    def setup(self):
+        rospy.loginfo("Pushing Container Away")
+        self.start_time = rospy.Time.now()
+        self.context.move_joint("drill_spin", 0.0)
+
+    def step(self):
+        time = rospy.Time.now()
+        if (time - self.start_time).to_sec() > 2:
+            self.context.set_state(StateIdle())
+            return
+        
+        self.context.active_container_open = False
+        self.context.active_container_pushed_in = False
+
+    def __repr__(self):
+        return "PushingContainerAway"
+
+
+"""class ShakingContainer(State):
+
+    def setup(self):
+        rospy.loginfo("Shaking container)
+        self.start_time = rospy.Time.now()
+
+    def step(self):
+        time = rospy.Time.now()
+        if (time - self.start_time).to_sec() > 20:
+            self.context.set_state(PushingContainerAway())
+            return
+        self.context.active_container_pushed_in = True
+        rospy.sleep(0.1)
+        self.context.active_container_pushed_in = False
+        rospy.sleep(0.1)
+
+    def __repr__(self):
+        return "ShakingContainer" """
